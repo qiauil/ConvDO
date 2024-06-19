@@ -8,7 +8,7 @@ class Domain():
     def __init__(self,boundaries,obstacles=[],delta_x=1,delta_y=1) -> None:
         self.delta_x=delta_x
         self.delta_y=delta_y
-        if isinstance(boundaries,collections.Sequence):
+        if isinstance(boundaries,Sequence):
             if len(boundaries)== 4:
                 self.left_boundary=boundaries[0]
                 self.right_boundary=boundaries[1]
@@ -21,7 +21,7 @@ class Domain():
         self.set_obstacles(obstacles=obstacles)   
     
     def set_obstacles(self,obstacles):
-        if isinstance(obstacles,collections.Sequence):
+        if isinstance(obstacles,Sequence):
             self.obstacles=obstacles
         else:
             raise Exception("obstacles need to be a sequence type.")          
