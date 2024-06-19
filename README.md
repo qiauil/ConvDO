@@ -1,0 +1,3 @@
+### ConvDO: Convolutional Differential Operators with PyTorch
+
+README in progress...
