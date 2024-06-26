@@ -82,7 +82,7 @@ print(c,d,e,f)
     (4,6) (-2,-2) (5,10) 11
 
 
-`self.nabla` is the nabla operator, $\nabla$. Other supported operator includes the Laplacian operator `self.nabla2`= $\nabla^2$ and gradient operators `self.grad_x`=$\partial/\partial x$ and `self.grad_y`=$\partial/\partial y$. For instance, the `Divergence` operator can also be written as
+`self.nabla` is the nabla operator, $\nabla$. Other supported operator includes the Laplacian operator `self.nabla2` = $\nabla^2$ and gradient operators `self.grad_x` = $\partial/\partial x$ and `self.grad_y` = $\partial/\partial y$. For instance, the `Divergence` operator can also be written as
 
 
 ```python
