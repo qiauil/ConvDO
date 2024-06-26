@@ -2,10 +2,11 @@
 # -*- coding: UTF-8 -*-
 import os,torch
 from . import *
-from foxutils.plotter.field import show_each_channel
 from .domain import *
 from .obstacles import *
 from .boundaries import *
+
+print("Warning: This is an old version of operator which will be deprecated soon. Please use 'operator_HO' instead.")
 
 class ScalarField(CommutativeValue):
     

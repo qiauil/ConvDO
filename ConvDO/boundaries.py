@@ -1,6 +1,6 @@
 #usr/bin/python3
 # -*- coding: UTF-8 -*-
-from . import *
+from .helpers import *
 from .faces import *
 from .meta_type import *
 
@@ -73,8 +73,6 @@ class DirichletBoundary(Boundary):
                 return DirichletBoundary(self.boundary_value*other)
             except TypeError:
                 return NotImplemented
-
- 
 
 class NeumannBoundary(Boundary):
 

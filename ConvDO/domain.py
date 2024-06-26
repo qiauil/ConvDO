@@ -1,6 +1,6 @@
 #usr/bin/python3
 # -*- coding: UTF-8 -*-
-from . import *
+from .helpers import *
 from .meta_type import *
 from .boundaries import *
 

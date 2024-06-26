@@ -14,8 +14,8 @@ def get_install_requires():
     return targets
 
 setuptools.setup(
-    name="ConvOD",
-    version="0.0.02",
+    name="ConvDO",
+    version="0.0.3",
     author="Qiauil",
     author_email="qiangliu.7@outlook.com",
     description="Convolutional Differential Operators with PyTorch",
