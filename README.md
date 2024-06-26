@@ -11,7 +11,7 @@ ConvDO is PyTorch-based and only supports 2D fields at the moment.
 
 Here is a simple case illustrating how to use the `ConvDo` package to calculate the residual of a physical field.
 
-[Run in colab](https://colab.research.google.com/github/tum-pbs/Diffusion-based-Flow-Prediction/blob/main/README.ipynb)
+[Run in colab](https://colab.research.google.com/github/qiauil/ConvDO/blob/main/README.ipynb)
 
 
 ### Kolmogorov flow
