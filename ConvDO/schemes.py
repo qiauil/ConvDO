@@ -3,11 +3,12 @@ from .meta_type import *
 
 class FDScheme():
 
-    def __init__(self, kernel) -> None:
-        if not torch.is_tensor(kernel):
-            kernel = torch.tensor(kernel)
-        self.kernel_dx, self.kernel_dy = self.gen_kernel(kernel)
-        self.pad = int((kernel.shape[0]-1)/2)
+    def __init__(self, kernel_weights) -> None:
+        if not torch.is_tensor(kernel_weights):
+            kernel_weights = torch.tensor(kernel_weights)
+        self.kernel_weights=kernel_weights
+        self.kernel_dx, self.kernel_dy = self.gen_kernel(kernel_weights)
+        self.pad = int((kernel_weights.shape[0]-1)/2)
 
     def gen_kernel(self, kernel: torch.Tensor):
         len_kernel = len(kernel)

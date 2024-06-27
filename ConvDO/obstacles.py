@@ -37,16 +37,25 @@ class DirichletObstacle(Obstacle):
         self.boundary_value=boundary_value
 
     def correct_left(self,padded_face,ori_field,delta):
-        return torch.where(self.x_left>0.5,self.boundary_value,padded_face)
-
+        return torch.where(
+            self.x_left>0.5,
+            self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,1,0,0),"constant",0)),
+            padded_face)
+    
     def correct_right(self,padded_face,ori_field,delta):
-        return torch.where(self.x_right>0.5,self.boundary_value,padded_face)
+        return torch.where(self.x_right>0.5,
+                           self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(1,0,0,0),"constant",0)),
+                           padded_face)
 
     def correct_top(self,padded_face,ori_field,delta):
-        return torch.where(self.y_top>0.5,self.boundary_value,padded_face)
-
+        return torch.where(self.y_top>0.5,
+                           self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(0,0,0,1),"constant",0)),
+                           padded_face)
+        
     def correct_bottom(self,padded_face,ori_field,delta):
-        return torch.where(self.y_bottom>0.5,self.boundary_value,padded_face)
+        return torch.where(self.y_bottom>0.5,
+                           self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,0,1,0),"constant",0)),
+                           padded_face)
     
 class NeumannObstacle(Obstacle):
     
@@ -55,16 +64,19 @@ class NeumannObstacle(Obstacle):
         self.boundary_face=NeumannFace(boundary_gradient)
         
     def correct_left(self,padded_face,ori_field,delta):
-        return torch.where(self.x_left>0.5,self.boundary_face.correct_inward_face(nn.functional.pad(ori_field,(0,1,0,0),"constant",0),delta),padded_face)
+        return torch.where(
+            self.x_left>0.5,
+            self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,1,0,0),"constant",0),delta)
+            ,padded_face)
     
     def correct_right(self,padded_face,ori_field,delta):
-        return torch.where(self.x_right>0.5,self.boundary_face.correct_outward_face(nn.functional.pad(ori_field,(1,0,0,0),"constant",0),delta),padded_face)
+        return torch.where(self.x_right>0.5,self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(1,0,0,0),"constant",0),delta),padded_face)
 
     def correct_top(self,padded_face,ori_field,delta):
-        return torch.where(self.y_top>0.5,self.boundary_face.correct_outward_face(nn.functional.pad(ori_field,(0,0,0,1),"constant",0),delta),padded_face)
+        return torch.where(self.y_top>0.5,self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(0,0,0,1),"constant",0),delta),padded_face)
         
     def correct_bottom(self,padded_face,ori_field,delta):
-        return torch.where(self.y_bottom>0.5,self.boundary_face.correct_inward_face(nn.functional.pad(ori_field,(0,0,1,0),"constant",0),delta),padded_face)
+        return torch.where(self.y_bottom>0.5,self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,0,1,0),"constant",0),delta),padded_face)
     
 class UnConstrainedObstacle(Obstacle):
 
@@ -74,21 +86,21 @@ class UnConstrainedObstacle(Obstacle):
         
     def correct_left(self,padded_face,ori_field,delta):
         return torch.where(self.x_left>0.5,
-                           self.boundary_face.correct_inward_face(nn.functional.pad(ori_field,(0,1,0,0),"constant",0),
+                           self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,1,0,0),"constant",0),
                                                                   nn.functional.pad(ori_field[...,1:],(0,2,0,0),"constant",0),
                                                                   nn.functional.pad(ori_field[...,2:],(0,3,0,0),"constant",0)),
                            padded_face)
     
     def correct_right(self,padded_face,ori_field,delta):
         return torch.where(self.x_right>0.5,
-                           self.boundary_face.correct_outward_face(nn.functional.pad(ori_field,(1,0,0,0),"constant",0),
+                           self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(1,0,0,0),"constant",0),
                                                                    nn.functional.pad(ori_field,(2,0,0,0),"constant",0)[...,:-1],
                                                                    nn.functional.pad(ori_field,(3,0,0,0),"constant",0)[...,:-2],),
                            padded_face)
 
     def correct_top(self,padded_face,ori_field,delta):
         return torch.where(self.y_top>0.5,
-                           self.boundary_face.correct_outward_face(nn.functional.pad(ori_field,(0,0,0,1),"constant",0),
+                           self.boundary_face.correct_outward_padding(nn.functional.pad(ori_field,(0,0,0,1),"constant",0),
                                                                    nn.functional.pad(ori_field[...,1:,:],(0,0,0,2),"constant",0),
                                                                    nn.functional.pad(ori_field[...,2:,:],(0,0,0,3),"constant",0)
                                                                    ),
@@ -96,7 +108,7 @@ class UnConstrainedObstacle(Obstacle):
         
     def correct_bottom(self,padded_face,ori_field,delta):
         return torch.where(self.y_bottom>0.5,
-                           self.boundary_face.correct_inward_face(nn.functional.pad(ori_field,(0,0,1,0),"constant",0),
+                           self.boundary_face.correct_inward_padding(nn.functional.pad(ori_field,(0,0,1,0),"constant",0),
                                                                   nn.functional.pad(ori_field,(0,0,2,0),"constant",0)[...,:-1,:],
                                                                   nn.functional.pad(ori_field,(0,0,3,0),"constant",0)[...,:-2,:]),
                            padded_face)

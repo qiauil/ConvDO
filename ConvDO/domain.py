@@ -18,6 +18,14 @@ class Domain():
                 raise Exception("The length of boundaries need to be 4: '[left_boundary, right_boundary, top_boundary, bottom_boundary]'")          
         else:
             raise Exception("Boundaries need to be set as a sequence type of '[left_boundary, right_boundary, top_boundary, bottom_boundary]'")                  
+        
+        c_1=isinstance(self.left_boundary,PeriodicBoundary) and not isinstance(self.right_boundary,PeriodicBoundary)
+        c_2=isinstance(self.right_boundary,PeriodicBoundary) and not isinstance(self.left_boundary,PeriodicBoundary)
+        c_3=isinstance(self.top_boundary,PeriodicBoundary) and not isinstance(self.bottom_boundary,PeriodicBoundary)
+        c_4=isinstance(self.bottom_boundary,PeriodicBoundary) and not isinstance(self.top_boundary,PeriodicBoundary)
+        if c_1 or c_2 or c_3 or c_4:
+            raise Exception("Periodic boundary should be set in pairs.")    
+        
         self.set_obstacles(obstacles=obstacles)   
     
     def set_obstacles(self,obstacles):

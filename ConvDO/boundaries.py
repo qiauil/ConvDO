@@ -29,19 +29,19 @@ class DirichletBoundary(Boundary):
         self.face_calculator=DirichletFace(boundary_value)
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_face(padded_face[...,0,:])
+        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:])
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_face(padded_face[...,:,-1])  
+        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1])  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_inward_face(padded_face[...,-1,:])  
+        padded_face[...,-1,:]=self.face_calculator.correct_inward_padding(ori_field[...,-1,:])  
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_inward_face(padded_face[...,:,0]) 
+        padded_face[...,:,0]=self.face_calculator.correct_inward_padding(ori_field[...,:,0]) 
         return padded_face   
     
     # + ： 
@@ -82,19 +82,19 @@ class NeumannBoundary(Boundary):
         self.face_calculator=NeumannFace(face_gradient)
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_face(ori_field[...,0,:],delta)
+        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:],delta)
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_face(ori_field[...,:,-1],delta)  
+        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1],delta)  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_inward_face(ori_field[...,-1,:],delta)  
+        padded_face[...,-1,:]=self.face_calculator.correct_inward_padding(ori_field[...,-1,:],delta)  
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_inward_face(ori_field[...,:,0],delta) 
+        padded_face[...,:,0]=self.face_calculator.correct_inward_padding(ori_field[...,:,0],delta) 
         return padded_face    
 
     # + ： 
@@ -132,19 +132,19 @@ class UnConstrainedBoundary(Boundary):
         self.face_calculator=UnConstrainedFace()
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_face(ori_field[...,0,:],ori_field[...,1,:],ori_field[...,2,:])
+        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:],ori_field[...,1,:],ori_field[...,2,:])
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_face(ori_field[...,:,-1],ori_field[...,:,-2],ori_field[...,:,-3])  
+        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1],ori_field[...,:,-2],ori_field[...,:,-3])  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_outward_face(ori_field[...,-1,:],ori_field[...,-2,:],ori_field[...,-3,:])
+        padded_face[...,-1,:]=self.face_calculator.correct_outward_padding(ori_field[...,-1,:],ori_field[...,-2,:],ori_field[...,-3,:])
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_outward_face(ori_field[...,:,0],ori_field[...,:,1],ori_field[...,:,2]) 
+        padded_face[...,:,0]=self.face_calculator.correct_outward_padding(ori_field[...,:,0],ori_field[...,:,1],ori_field[...,:,2]) 
         return padded_face    
 
     # + ： 
@@ -161,18 +161,22 @@ class PeriodicBoundary(Boundary):
         super().__init__()
     
     def correct_top(self,padded_face,ori_field,delta):
+        print("Warning: correct only works for 2nd scheme, if you are using higher order, please directly pad the field with 'circular' model")
         padded_face[...,0,:]=(ori_field[...,0,:]+ori_field[...,-1,:])/2
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
+        print("Warning: correct only works for 2nd scheme, if you are using higher order, please directly pad the field with 'circular' model")
         padded_face[...,:,-1]=(ori_field[...,:,0]+ori_field[...,:,-1])/2
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
+        print("Warning: correct only works for 2nd scheme, if you are using higher order, please directly pad the field with 'circular' model")
         padded_face[...,-1,:]=(ori_field[...,0,:]+ori_field[...,-1,:])/2
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
+        print("Warning: correct only works for 2nd scheme, if you are using higher order, please directly pad the field with 'circular' model")
         padded_face[...,:,0]=(ori_field[...,:,0]+ori_field[...,:,-1])/2
         return padded_face    
 
