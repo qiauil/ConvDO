@@ -1,6 +1,7 @@
 <center>
-<img src="README_files/ConvDO.png"/>
+<img src="pics/ConvDO.png"/>
 </center>
+
 
 ## About
 
@@ -31,6 +32,11 @@ for i, ax in enumerate(axs):
     ax.set_title(channel_names[i])
 plt.show()
 ```
+
+    /home/liu/anaconda3/envs/nashmtl/lib/python3.9/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+      from .autonotebook import tqdm as notebook_tqdm
+
+
 
 
 ![png](README_files/README_2_1.png)
@@ -122,9 +128,9 @@ plt.show()
 ```
 
 
-​    
-![png](README_files/README_13_1.png)
-​    
+
+![png](README_files/README_13_0.png)
+    
 
 
 Since the operation is based on the convolution provided by PyTorch, it supports batched input and output. If your input of a `ScalarField` only contains 2 dimensions $H \times W$, it will automatically convert to a new tensor with the shape of $B\times C \times H \times W$. The shape of the output is always $B\times C \times H \times W$.
@@ -173,5 +179,107 @@ plt.show()
 
 
 ![png](README_files/README_15_2.png)
+    
+
+
+We could also use this feature to solve some PDEs with gradient descent. For example, we could solve the [2D lid-driven cavity flow](https://www.researchgate.net/publication/324413434_The_Lid-Driven_Cavity):
+
+
+```python
+from tqdm import tqdm
+
+class SteadyNS(FieldOperations):
+    
+    def __init__(self, Re,order=2, device="cpu", dtype=torch.float32) -> None:
+        super().__init__(order, device, dtype)
+        self.Re=Re
+        
+    def __call__(self, 
+                 u:torch.Tensor,
+                 v:torch.Tensor,
+                 p:torch.Tensor,
+                 domain_u:Domain,
+                 domain_v:Domain,
+                 domain_p:Domain):
+        u=ScalarField(u,domain_u)
+        v=ScalarField(v,domain_v)
+        p=ScalarField(p,domain_p)
+        velocity=VectorValue(u,v)
+        viscosity=self.nabla2*velocity*(1/self.Re)
+        momentum_x=self.grad_x*u*u+self.grad_y*u*v+self.grad_x*p-viscosity.ux
+        momentum_y=self.grad_x*v*u+self.grad_y*v*v+self.grad_y*p-viscosity.uy
+        divergence=self.nabla@velocity
+        return momentum_x.value.abs(),momentum_y.value.abs(),divergence.value.abs()
+
+operator=SteadyNS(Re=10,order=2)
+
+N=128
+
+domain_u=Domain(
+    boundaries=[
+        DirichletBoundary(0.0),
+        DirichletBoundary(0.0),
+        DirichletBoundary(1.0),
+        DirichletBoundary(0.0)],
+    delta_x=1.0/N,
+    delta_y=1.0/N,)
+
+domain_v=Domain(boundaries=[DirichletBoundary(0.0)]*4,
+                delta_x=1.0/N,
+                delta_y=1.0/N,)
+
+domain_p=Domain(boundaries=[NeumannBoundary(0.0)]*4,               
+                delta_x=1.0/N,
+                delta_y=1.0/N,)
+        
+uvp=torch.zeros((3,N,N),requires_grad=True)
+optimizer = torch.optim.Adam([uvp],lr=0.001)
+losses=[]
+p_bar=tqdm(range(50000))
+for i in p_bar:
+    optimizer.zero_grad()
+    m_x,m_y,c=operator(uvp[0],uvp[1],uvp[2],domain_u,domain_v,domain_p)
+    loss=m_x.sum()+m_y.sum()+c.sum()
+    loss.backward()
+    optimizer.step()
+    losses.append(loss.item())
+    p_bar.set_description("Loss: {:.3f}".format(loss.item()))
+plt.plot(losses)
+
+channel_names=["u","v","p"]
+fig,ax=plt.subplots(1,3,figsize=(15,5))
+for i in range(3):
+    ax[i].imshow(uvp[i].detach().numpy())
+    ax[i].set_title(channel_names[i])
+plt.show()
+
+channel_names=["Momentum x","Momentum y","Divergence"]
+residuals=operator(uvp[0],uvp[1],uvp[2],domain_u,domain_v,domain_p)
+fig,ax=plt.subplots(1,3,figsize=(15,5))
+for i in range(3):
+    ax[i].imshow(residuals[i].detach().numpy().squeeze().squeeze())
+    ax[i].set_title(channel_names[i])
+
+plt.show()
+```
+
+    Loss: 38669.840: 100%|██████████| 50000/50000 [05:34<00:00, 149.49it/s]
+
+
+
+
+![png](README_files/README_17_1.png)
+    
+
+
+
+
+![png](README_files/README_17_2.png)
+    
+
+
+
+
+![png](README_files/README_17_3.png)
     
 
