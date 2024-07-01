@@ -2,11 +2,22 @@
 <img src="pics/ConvDO.png"/>
 </center>
 
-
 ## About
 
 ConvDO is a Convolutional Differential Operator designed for Physics-based deep learning study.
 ConvDO is PyTorch-based and only supports 2D fields at the moment.
+
+## Installation
+
+* Install through pip: `pip install git+https://github.com/qiauil/ConvDO`
+* Install locally: Download the repository and run `./install.sh` or the following code:
+
+```bash
+python3 setup.py sdist bdist_wheel
+cd dist
+pip install ConvDO-*.whl
+```
+
 
 ## A Quick How To
 
@@ -32,11 +43,6 @@ for i, ax in enumerate(axs):
     ax.set_title(channel_names[i])
 plt.show()
 ```
-
-    /home/liu/anaconda3/envs/nashmtl/lib/python3.9/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-      from .autonotebook import tqdm as notebook_tqdm
-
-
 
 
 ![png](README_files/README_2_1.png)
@@ -128,7 +134,6 @@ plt.show()
 ```
 
 
-
 ![png](README_files/README_13_0.png)
     
 
@@ -165,17 +170,12 @@ plt.show()
 ```
 
 
-​    
 ![png](README_files/README_15_0.png)
-​    
-
-
+    
 
 
 ![png](README_files/README_15_1.png)
     
-
-
 
 
 ![png](README_files/README_15_2.png)
@@ -266,20 +266,24 @@ plt.show()
     Loss: 38669.840: 100%|██████████| 50000/50000 [05:34<00:00, 149.49it/s]
 
 
-
-
 ![png](README_files/README_17_1.png)
     
-
-
 
 
 ![png](README_files/README_17_2.png)
     
 
 
-
-
 ![png](README_files/README_17_3.png)
     
 
+
+## Further Reading
+
+Projects using `ConvDO`:
+* [Diffusion-based-Flow-Prediction](https://github.com/tum-pbs/Diffusion-based-Flow-Prediction): Diffusion-based flow prediction (DBFP) with uncertainty for airfoils.
+* To be updated... 
+
+If you need to solve more complex PDEs using differentiable functions, please have a check on [PhiFlow](https://github.com/tum-pbs/PhiFlow) project.
+
+For more research on physics based deep learning research, please visit the website of our research group at TUM: https://ge.in.tum.de/publications/.
