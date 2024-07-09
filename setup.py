@@ -15,7 +15,7 @@ def get_install_requires():
 
 setuptools.setup(
     name="ConvDO",
-    version="0.0.31",
+    version="0.0.32",
     author="Qiauil",
     author_email="qiangliu.7@outlook.com",
     description="Convolutional Differential Operators with PyTorch",
