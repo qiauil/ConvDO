@@ -106,10 +106,7 @@ class ConvOperator():
                 raise ValueError(
                     "High order gradient only support PeriodicBoundary with no obstacles inside.")
         else:
-            try:
-                return self*other
-            except TypeError:
-                raise NotImplementedError("Operation not supported")
+            raise NotImplementedError("Operation not supported")
 
 
 def HOGrad(order: int, direction, device="cpu", dtype=torch.float32):
