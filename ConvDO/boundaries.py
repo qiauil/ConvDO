@@ -55,7 +55,7 @@ class DirichletBoundary(Boundary):
         else:
             try:
                 # Dirichlet+number=Dirichlet
-                return DirichletBoundary(self.boundary_value*other)
+                return DirichletBoundary(self.boundary_value+other)
             except TypeError:
                 return NotImplemented
 
