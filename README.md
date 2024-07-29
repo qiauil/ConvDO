@@ -1,13 +1,14 @@
-<center>
-<img src="./docs/assets/logo/ConvDO.svg"/>
-</center>
+<h1 align="center">
+  <img src="./docs/assets/logo/ConvDO.svg"/>
+</h1>
+
+<h4 align="center">Convolutional Differential Operators for Physics-based Deep Learning Study</h4>
+<h6 align="center">Calculate the spatial derivative differentiablly!</h6>
+
+
 <p align="center">
   [<a href="https://qiauil.github.io/ConvDO/">📖 Documentation & Examples</a>]
 </p>
-## About
-
-ConvDO is a **Convolutional Differential Operator** designed for Physics-based deep learning study. It can be used to calculate the spatial derivative of a field.
-
 ## Installation
 
 * Install through pip: `pip install git+https://github.com/qiauil/ConvDO`
