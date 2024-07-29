@@ -10,24 +10,25 @@ edit_uri: ""  # No edit button, as some of our pages are in /docs and some in /e
 theme:
     name: material
     features:
-        - navigation.sections  # Sections are included in the navigation on the left.
+        #- navigation.sections  # Sections are included in the navigation on the left.
         - toc.integrate  # Table of contents is integrated on the left; does not appear separately on the right.
         - header.autohide  # header disappears as you scroll
     palette:
         - scheme: default
-          primary: indigo
+          primary: deep purple
           accent: amber
           toggle:
              icon: material/weather-night
              name: Switch to dark mode
         - scheme: slate
-          primary: indigo
+          primary: deep purple
           accent: amber
           toggle:
              icon: material/weather-sunny
              name: Switch to light mode
     icon:
         repo: fontawesome/brands/github  # GitHub logo in top right
+    logo: assets/logo/ConvDO_white.svg
 
 extra:
   social:
@@ -74,7 +75,19 @@ plugins:
                     members_order: source  # order methods according to their order of definition in the source code, not alphabetical order
                     heading_level: 4
                     show_symbol_type_heading: true
-                    docstring_style: null
+                    docstring_style: google
 
 nav:
-    - 'index.md'
+    - 'Home': 'index.md'
+    - 'Step to Step Examples': 
+        - 'Divergence Operator': 'contents/examples/divergence.ipynb'
+        - 'Operator with obstacles': 'contents/examples/obstacles.ipynb'
+        - 'Optimization': 'contents/examples/optimization.ipynb'
+    - 'Manual': 
+        - 'Coordinate': 'contents/guide/coordinate.ipynb'
+        - 'Meta Variables': 'contents/guide/meta.md'
+        - 'Operators': 'contents/guide/operators.md'
+        - 'Boundaries': 'contents/guide/boundaries.md'
+        - 'Obstacles': 'contents/guide/obstacles.md'
+        - 'Domains': 'contents/guide/domain.ipynb'
+        - 'Operations': 'contents/guide/operations.md'

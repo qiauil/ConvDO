@@ -3,9 +3,39 @@
 from .helpers import *
 from .meta_type import *
 from .boundaries import *
+from typing import Sequence
 
-class Domain():
-    def __init__(self,boundaries,obstacles=[],delta_x=1,delta_y=1) -> None:
+def _obstacles_add(self_obstacle,other_obstacle):
+    if len(self_obstacle)!=len(other_obstacle):
+        raise Exception("The number of obstacles in two domain need to be the same.")
+    return [self_obstacle[i]+other_obstacle[i] for i in range(len(self_obstacle))]
+
+def _obstacles_mul(self_obstacle,other_obstacle):
+    if len(self_obstacle)!=len(other_obstacle):
+        raise Exception("The number of obstacles in two domain need to be the same.")
+    return [self_obstacle[i]*other_obstacle[i] for i in range(len(self_obstacle))]
+
+def _obstacles_div(self_obstacle,other_obstacle):
+    if len(self_obstacle)!=len(other_obstacle):
+        raise Exception("The number of obstacles in two domain need to be the same.")
+    return [self_obstacle[i]/other_obstacle[i] for i in range(len(self_obstacle))]
+
+class Domain(CommutativeValue):
+    """
+    A class to represent a domain.
+    
+    Args:
+        boundaries (Sequence): A sequence of four boundary objects representing the boundary conditions. 
+            The order is [left_boundary, right_boundary, top_boundary, bottom_boundary].
+        obstacles (Sequence, optional): A sequence of obstacle objects representing the solid obstacles inside the domain.
+            Defaults to [].
+        delta_x (float, optional): The grid spacing in the x direction. Defaults to 1.0.
+        delta_y (float, optional): The grid spacing in the y direction. Defaults to 1.0.
+    """
+    def __init__(self,
+                 boundaries:Sequence,obstacles=[],
+                 delta_x:float=1.0,
+                 delta_y:float=1.0) -> None:
         self.delta_x=delta_x
         self.delta_y=delta_y
         if isinstance(boundaries,Sequence):
@@ -43,7 +73,7 @@ class Domain():
                     self.top_boundary+other.top_boundary,
                     self.bottom_boundary+other.bottom_boundary
                 ],
-                obstacles=self.obstacles,
+                obstacles=_obstacles_add(self.obstacles,other.obstacles),
                 delta_x=self.delta_x,
                 delta_y=self.delta_y
             )
@@ -58,28 +88,7 @@ class Domain():
                 obstacles=self.obstacles,
                 delta_x=self.delta_x,
                 delta_y=self.delta_y
-            )            
-
-    def __radd__(self, other):
-        return self+other
-    
-    def __iadd__(self,other):
-        return self+other
-
-    def __sub__(self,other):
-        try:
-            return self+(-1*other)
-        except TypeError:
-            return NotImplemented
-
-    def __rsub__(self,other):
-        try:
-            return other+(-1*self)
-        except TypeError:
-            return NotImplemented
-        
-    def __isub__(self,other):
-        return self-other    
+            )             
 
     def __mul__(self, other):
         if isinstance(other,Domain):
@@ -90,7 +99,7 @@ class Domain():
                     self.top_boundary*other.top_boundary,
                     self.bottom_boundary*other.bottom_boundary
                 ],
-                obstacles=self.obstacles,
+                obstacles=_obstacles_mul(self.obstacles,other.obstacles),
                 delta_x=self.delta_x,
                 delta_y=self.delta_y
             )
@@ -106,16 +115,103 @@ class Domain():
                 delta_x=self.delta_x,
                 delta_y=self.delta_y
             )   
-    
-    def __rmul__(self,other):
-        return self*other       
-
-    def __imul__(self,other):
-        return self*other
   
+    def __pow__(self, other):
+        return Domain(
+            [
+                self.left_boundary**other,
+                self.right_boundary**other,
+                self.top_boundary**other,
+                self.bottom_boundary**other
+            ],
+            obstacles=[obstacle**other for obstacle in self.obstacles],
+            delta_x=self.delta_x,
+            delta_y=self.delta_y
+        )   
+
+    def __truediv__(self, other):
+        if isinstance(other,Domain):
+            return Domain(
+                [
+                    self.left_boundary/other.left_boundary,
+                    self.right_boundary/other.right_boundary,
+                    self.top_boundary/other.top_boundary,
+                    self.bottom_boundary/other.bottom_boundary
+                ],
+                obstacles=_obstacles_div(self.obstacles,other.obstacles),
+                delta_x=self.delta_x,
+                delta_y=self.delta_y
+            )
+        else:
+            try:
+                return Domain(
+                    [
+                        self.left_boundary/other,
+                        self.right_boundary/other,
+                        self.top_boundary/other,
+                        self.bottom_boundary/other
+                    ],
+                    obstacles=[obstacle/other for obstacle in self.obstacles],
+                    delta_x=self.delta_x,
+                    delta_y=self.delta_y
+                )
+            except Exception:
+                return NotImplemented
+
+    def __rtruediv__(self, other):
+        if isinstance(other,Domain):
+            return Domain(
+                [
+                    other.left_boundary/self.left_boundary,
+                    other.right_boundary/self.right_boundary,
+                    other.top_boundary/self.top_boundary,
+                    other.bottom_boundary/self.bottom_boundary
+                ],
+                obstacles=_obstacles_div(other.obstacles,self.obstacles),
+                delta_x=self.delta_x,
+                delta_y=self.delta_y
+            )
+        else:
+            try:
+                return Domain(
+                    [
+                        other/self.left_boundary,
+                        other/self.right_boundary,
+                        other/self.top_boundary,
+                        other/self.bottom_boundary
+                    ],
+                    obstacles=[other/obstacle for obstacle in self.obstacles],
+                    delta_x=self.delta_x,
+                    delta_y=self.delta_y
+                )
+            except Exception:
+                return NotImplemented
 
 def UnconstrainedDomain(obstacles=[],delta_x=1,delta_y=1):
+    """
+    Create a domain with unconstrained boundary conditions for all boundaries.
+
+    Args:
+        obstacles (list, optional): _description_. Defaults to [].
+        delta_x (int, optional): _description_. Defaults to 1.
+        delta_y (int, optional): _description_. Defaults to 1.
+        
+    Returns:
+        Domain (Domain): A domain object.
+    """
     return Domain(boundaries=[UnConstrainedBoundary()]*4,obstacles=obstacles,delta_x=delta_x,delta_y=delta_y)
 
 def PeriodicDomain(obstacles=[],delta_x=1,delta_y=1):
+    """
+    Create a domain with periodic boundary conditions for all boundaries.
+
+    Args:
+        obstacles (list, optional): _description_. Defaults to [].
+        delta_x (int, optional): _description_. Defaults to 1.
+        delta_y (int, optional): _description_. Defaults to 1.
+        
+    Returns:
+        Domain (Domain): A domain object.
+
+    """
     return Domain(boundaries=[PeriodicBoundary()]*4,obstacles=obstacles,delta_x=delta_x,delta_y=delta_y)

@@ -22,94 +22,123 @@ class Boundary(CommutativeValue):
         pass
   
 class DirichletBoundary(Boundary):
+    '''
+    DirichletBoundary is a boundary condition that the value of the field is fixed at the boundary.
+    '''
 
-    def __init__(self,boundary_value) -> None:
+    def __init__(self,boundary_value: float) -> None:
         super().__init__()
-        self.boundary_value=boundary_value
-        self.face_calculator=DirichletFace(boundary_value)
+        self.boundary_face=DirichletFace(boundary_value)
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:])
+        padded_face[...,0,:]=self.boundary_face.correct_outward_padding(ori_field[...,0,:])
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1])  
+        padded_face[...,:,-1]=self.boundary_face.correct_outward_padding(ori_field[...,:,-1])  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_inward_padding(ori_field[...,-1,:])  
+        padded_face[...,-1,:]=self.boundary_face.correct_inward_padding(ori_field[...,-1,:])  
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_inward_padding(ori_field[...,:,0]) 
+        padded_face[...,:,0]=self.boundary_face.correct_inward_padding(ori_field[...,:,0]) 
         return padded_face   
     
     # + ： 
     def __add__(self, other):
         if isinstance(other,DirichletBoundary):
             # Dirichlet+Dirichlet=Dirichlet
-            return DirichletBoundary(self.boundary_value+other.boundary_value)
+            return DirichletBoundary(self.boundary_face.face_value+other.boundary_face.face_value)
         elif isinstance(other,Boundary):
             # Dirichlet+otherboundary=uncontrainedBoundary
             return UnConstrainedBoundary()
         else:
             try:
                 # Dirichlet+number=Dirichlet
-                return DirichletBoundary(self.boundary_value+other)
-            except TypeError:
+                return DirichletBoundary(self.boundary_face.face_value+other)
+            except Exception:
                 return NotImplemented
 
     # *           
     def __mul__(self,other):
         if isinstance(other,DirichletBoundary):
             # Dirichlet*Dirichlet=Dirichlet
-            return DirichletBoundary(self.boundary_value*other.boundary_value)
+            return DirichletBoundary(self.boundary_face.face_value*other.boundary_face.face_value)
         elif isinstance(other,Boundary):
             # Dirichlet*otherboundary=uncontrainedBoundary
             return UnConstrainedBoundary()
         else:
             try:
                 # Dirichlet*number=Dirichlet
-                return DirichletBoundary(self.boundary_value*other)
-            except TypeError:
+                return DirichletBoundary(self.boundary_face.face_value*other)
+            except Exception:
+                return NotImplemented
+            
+    def __truediv__(self, other):
+        if isinstance(other,DirichletBoundary):
+            return DirichletBoundary(self.boundary_face.face_value/other.boundary_face.face_value)
+        elif isinstance(other,Boundary):
+            return UnConstrainedBoundary()
+        else:
+            try:
+                return DirichletBoundary(self.boundary_face.face_value/other)
+            except Exception:
+                return NotImplemented
+        
+    def __rtruediv__(self, other):
+        if isinstance(other,DirichletBoundary):
+            return DirichletBoundary(other.boundary_face.face_value/self.boundary_face.face_value)
+        elif isinstance(other,Boundary):
+            return UnConstrainedBoundary()
+        else:
+            try:
+                return DirichletBoundary(other/self.boundary_face.face_value)
+            except Exception:
                 return NotImplemented
 
-class NeumannBoundary(Boundary):
+    def __pow__(self, other):
+        return DirichletBoundary(self.boundary_face.face_value**other)
 
-    def __init__(self,face_gradient) -> None:
+class NeumannBoundary(Boundary):
+    '''
+    NeumannBoundary is a boundary condition that the gradient of the field is fixed at the boundary.
+    '''
+
+    def __init__(self,face_gradient: float) -> None:
         super().__init__()
-        self.face_gradient=face_gradient
-        self.face_calculator=NeumannFace(face_gradient)
+        self.boundary_face=NeumannFace(face_gradient)
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:],delta)
+        padded_face[...,0,:]=self.boundary_face.correct_outward_padding(ori_field[...,0,:],delta)
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1],delta)  
+        padded_face[...,:,-1]=self.boundary_face.correct_outward_padding(ori_field[...,:,-1],delta)  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_inward_padding(ori_field[...,-1,:],delta)  
+        padded_face[...,-1,:]=self.boundary_face.correct_inward_padding(ori_field[...,-1,:],delta)  
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_inward_padding(ori_field[...,:,0],delta) 
+        padded_face[...,:,0]=self.boundary_face.correct_inward_padding(ori_field[...,:,0],delta) 
         return padded_face    
 
     # + ： 
     def __add__(self, other):
         if isinstance(other,NeumannBoundary):
             # Neumann+Neumann=Dirichlet
-            return NeumannBoundary(self.face_gradient+other.face_gradient)
+            return NeumannBoundary(self.boundary_face.face_gradient+other.boundary_face.face_gradient)
         elif isinstance(other,Boundary):
-            # Dirichlet+otherboundary=uncontrainedBoundary
+            # Neumann+otherboundary=uncontrainedBoundary
             return UnConstrainedBoundary()
         else:
             try:
-                # Neumann+number=NeumannBoundary
-                return NeumannBoundary(self.face_gradient)
-            except TypeError:
+                # Neumann+number=Neumann
+                return NeumannBoundary(self.boundary_face.face_gradient)
+            except Exception:
                 return NotImplemented
 
     # *           
@@ -119,32 +148,58 @@ class NeumannBoundary(Boundary):
             return UnConstrainedBoundary()
         else:
             try:
-                # Neumann*number=Neumann
-                return DirichletBoundary(self.boundary_value*other)
-            except TypeError:
+                # Neumann*number=Neumann*number
+                return DirichletBoundary(self.boundary_face.face_value*other)
+            except Exception:
                 return NotImplemented
+
+    def __truediv__(self, other):
+        if isinstance(other,Boundary):
+            return UnConstrainedBoundary()
+        else:
+            try:
+                return DirichletBoundary(self.boundary_face.face_value/other)
+            except Exception:
+                return NotImplemented
+
+    def __rtruediv__(self, other):
+        if isinstance(other,Boundary):
+            return UnConstrainedBoundary()
+        else:
+            try:
+                return DirichletBoundary(other/self.boundary_face.face_value)
+            except Exception:
+                return NotImplemented
+
+    def __pow__(self, other):
+        return UnConstrainedBoundary()
 
 
 class UnConstrainedBoundary(Boundary):
+    '''
+    UnConstrainedBoundary is a boundary condition that the value at the boundary is calculated by the value of the neighbour cells.
+    If you are not sure about the boundary condition, you can use UnConstrainedBoundary.
+    The 
+    '''
 
     def __init__(self) -> None:
         super().__init__()
-        self.face_calculator=UnConstrainedFace()
+        self.boundary_face=UnConstrainedFace()
     
     def correct_top(self,padded_face,ori_field,delta):
-        padded_face[...,0,:]=self.face_calculator.correct_outward_padding(ori_field[...,0,:],ori_field[...,1,:],ori_field[...,2,:])
+        padded_face[...,0,:]=self.boundary_face.correct_outward_padding(ori_field[...,0,:],ori_field[...,1,:],ori_field[...,2,:])
         return padded_face
 
     def correct_right(self,padded_face,ori_field,delta):
-        padded_face[...,:,-1]=self.face_calculator.correct_outward_padding(ori_field[...,:,-1],ori_field[...,:,-2],ori_field[...,:,-3])  
+        padded_face[...,:,-1]=self.boundary_face.correct_outward_padding(ori_field[...,:,-1],ori_field[...,:,-2],ori_field[...,:,-3])  
         return padded_face
 
     def correct_bottom(self,padded_face,ori_field,delta):
-        padded_face[...,-1,:]=self.face_calculator.correct_outward_padding(ori_field[...,-1,:],ori_field[...,-2,:],ori_field[...,-3,:])
+        padded_face[...,-1,:]=self.boundary_face.correct_outward_padding(ori_field[...,-1,:],ori_field[...,-2,:],ori_field[...,-3,:])
         return padded_face
         
     def correct_left(self,padded_face,ori_field,delta):
-        padded_face[...,:,0]=self.face_calculator.correct_outward_padding(ori_field[...,:,0],ori_field[...,:,1],ori_field[...,:,2]) 
+        padded_face[...,:,0]=self.boundary_face.correct_outward_padding(ori_field[...,:,0],ori_field[...,:,1],ori_field[...,:,2]) 
         return padded_face    
 
     # + ： 
@@ -153,9 +208,20 @@ class UnConstrainedBoundary(Boundary):
     # *           
     def __mul__(self,other):
         return UnConstrainedBoundary()
+
+    def __pow__(self, other):
+        return UnConstrainedBoundary()
+    
+    def __truediv__(self, other):
+        return UnConstrainedBoundary()
             
+    def __rtruediv__(self, other):
+        return UnConstrainedBoundary()
     
 class PeriodicBoundary(Boundary):
+    '''
+    Periodic boundary conditions.
+    '''
     
     def __init__(self) -> None:
         super().__init__()
@@ -197,3 +263,18 @@ class PeriodicBoundary(Boundary):
             return UnConstrainedBoundary()
         else:
             return PeriodicBoundary()
+        
+    def __pow__(self, other):
+        return PeriodicBoundary()
+    
+    def __truediv__(self, other):
+        if isinstance(other,PeriodicBoundary):
+            return PeriodicBoundary()
+        else:
+            return UnConstrainedBoundary()
+        
+    def __rtruediv__(self, other):
+        if isinstance(other,PeriodicBoundary):
+            return PeriodicBoundary()
+        else:
+            return UnConstrainedBoundary()

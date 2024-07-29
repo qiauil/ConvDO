@@ -1,16 +1,18 @@
 #usr/bin/python3
 # -*- coding: UTF-8 -*-
-import os,torch
+import torch
 from . import *
 from .domain import *
 from .obstacles import *
 from .boundaries import *
+from typing import Optional
 
 print("Warning: This is an old version of operator which will be deprecated soon. Please use 'operator_HO' instead.")
 
 class ScalarField(CommutativeValue):
     
-    def __init__(self,value,domain=UnconstrainedDomain()) -> None:
+    def __init__(self,value:torch.Tensor,
+                 domain:Optional[Domain]=UnconstrainedDomain()) -> None:
         self.value=value
         self.domain=domain
     
@@ -55,7 +57,7 @@ class GradX():
         else:
             try:
                 return self*other
-            except TypeError:
+            except Exception:
                 return NotImplemented    
             
 class GradY():
@@ -87,7 +89,7 @@ class GradY():
         else:
             try:
                 return self*other
-            except TypeError:
+            except Exception:
                 return NotImplemented    
 
 class LaplacianX():
@@ -119,7 +121,7 @@ class LaplacianX():
         else:
             try:
                 return self*other
-            except TypeError:
+            except Exception:
                 return NotImplemented     
 
 class LaplacianY():
@@ -151,7 +153,7 @@ class LaplacianY():
         else:
             try:
                 return self*other
-            except TypeError:
+            except Exception:
                 return NotImplemented   
 
 class Laplacian():

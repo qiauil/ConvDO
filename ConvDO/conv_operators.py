@@ -3,16 +3,35 @@ from .boundaries import *
 from .domain import *
 from .schemes import *
 import math
+from typing import Optional
 
 class ScalarField(CommutativeValue):
+    r"""ScalarField is a class for scalar fields.
+
+    Args:
+        value (Optional[torch.Tensor], optional): The value of the scalar field. Defaults to None.
+            It can be changed by calling the `register_value` method.
+            The shape of the tensor should be (1,1,H,W) or (H,W).
+        domain (Optional[Domain], optional): The domain of the scalar field. Defaults to UnconstrainedDomain().
+    """
     
-    def __init__(self,value,domain=UnconstrainedDomain()) -> None:
-        if isinstance(value,torch.Tensor):
-            if len(value.shape)==2:
-                value=value.unsqueeze(0).unsqueeze(0)
-                # add batch and channel dimension
-        self.value=value
+    def __init__(self,value:Optional[torch.Tensor]=None,
+                 domain:Optional[Domain]=UnconstrainedDomain()) -> None:
+        self.value=None
+        if value is not None:
+            self.register_value(value)
         self.domain=domain
+        
+    def register_value(self,value: torch.Tensor):
+        r"""Register the value of the scalar field.
+        
+        Args:
+            value (torch.Tensor): The value of the scalar field.
+        """
+    
+        if len(value.shape)==2:
+            value=value.unsqueeze(0).unsqueeze(0)
+        self.value=value
     
     def __add__(self, other):
         if isinstance(other,ScalarField):
@@ -25,6 +44,27 @@ class ScalarField(CommutativeValue):
             return ScalarField(self.value*other.value,self.domain*other.domain)
         else:
             return ScalarField(self.value*other,self.domain*other)   
+
+    def __pow__(self, other):
+        return ScalarField(self.value**other,self.domain**other)
+    
+    def __truediv__(self, other):
+        if isinstance(other,ScalarField):
+            return ScalarField(self.value/other.value,self.domain/other.domain)
+        else:
+            try:
+                return ScalarField(self.value/other,self.domain/other)
+            except:
+                return NotImplemented
+    
+    def __rtruediv__(self, other):
+        if isinstance(other,ScalarField):
+            return ScalarField(other.value/self.value,other.domain/self.domain)
+        else:
+            try:
+                return ScalarField(other/self.value,other/self.domain)
+            except:
+                return NotImplemented
         
 class ConvOperator():
     def __init__(self, scheme, direction="x", derivative=1, device="cpu", dtype=torch.float32) -> None:
@@ -42,11 +82,11 @@ class ConvOperator():
     
     def allow_highorder (self, domain):
         if self.direction == "x":
-            c_1= isinstance(domain.left_boundary, PeriodicBoundary) 
+            return isinstance(domain.left_boundary, PeriodicBoundary) 
         else:
-            c_1= isinstance(domain.top_boundary, PeriodicBoundary)
-        c_2= domain.obstacles == []
-        return c_1 and c_2
+            return isinstance(domain.top_boundary, PeriodicBoundary)
+        #c_2= domain.obstacles == []
+        #return c_1 and c_2
 
     def __mul__(self, other):
         if isinstance(other, ScalarField):
@@ -109,21 +149,120 @@ class ConvOperator():
             raise NotImplementedError("Operation not supported")
 
 
-def HOGrad(order: int, direction, device="cpu", dtype=torch.float32):
+def ConvGrad(order: int=2, direction: str="x", device="cpu", dtype=torch.float32):
+    r"""
+    Gradient operator $\partial / \partial x$ or $\partial / \partial y$ for a scalar.
+    
+    Examples:
+        ```python
+        p=ScalarField(torch.rand(1,1,10,10))
+        grad_x = ConvGrad(order=2, direction="x", device="cpu", dtype=torch.float32)
+        grad_y = ConvGrad(order=2, direction="y", device="cpu", dtype=torch.float32)
+        grad_x*p # $\partial p / \partial x$ 
+        grad_y*p # $\partial p / \partial y$
+        ```
+
+    Args:
+        order (int): The order of the central interpolation scheme (default is 2).
+        direction (str): The direction of the gradient operator, ("x" or "y", default is "x").
+        device (str, optional): The device to use for computation (default is "cpu").
+        dtype (torch.dtype, optional): The data type to use for computation (default is torch.float32).
+
+    Returns:
+        ConvOperator (ConvOperator): The convolutional gradient operator.
+
+    """
     return ConvOperator(CENTRAL_INTERPOLATION_SCHEMES[order], direction=direction, derivative=1, device=device, dtype=dtype)
 
 
-def HOGrad2(order: int, direction, device="cpu", dtype=torch.float32):
+def ConvGrad2(order: int=2, direction="x", device="cpu", dtype=torch.float32):
+    r"""
+    Second order gradient operator $\partial^2 / \partial x^2$ or $\partial^2 / \partial y^2$ for a scalar.
+    
+    Examples:
+        ```python
+        p=ScalarField(torch.rand(1,1,10,10))
+        grad_x = ConvGrad2(order=2, direction="x", device="cpu", dtype=torch.float32)
+        grad_y = ConvGrad2(order=2, direction="y", device="cpu", dtype=torch.float32)
+        grad_x*p # $\partial^2 p / \partial x^2$ 
+        grad_y*p # $\partial^2 p / \partial y^2$
+        ```
+        
+    Args:
+        order (int): The order of the central Laplacian scheme (default is 2).
+        direction (str): The direction of the gradient operator, ("x" or "y", default is "x").
+        device (str, optional): The device to use for computation (default is "cpu").
+        dtype (torch.dtype, optional): The data type to use for computation (default is torch.float32).
+    
+    Returns:
+        ConvOperator (ConvOperator): The convolutional gradient operator.
+    """
     return ConvOperator(CENTRAL_LAPLACIAN_SCHEMES[order], direction=direction, derivative=2, device=device, dtype=dtype)
 
 
-def HONabla(order: int, device="cpu", dtype=torch.float32):
+def ConvNabla(order: int, device="cpu", dtype=torch.float32):
+    r"""
+    $\nabla=(\partial p / \partial x,\partial p / \partial y)$ operator. 
+    Can be used to compute the gradient of a scalar field or the divergence of a vector field.
+    
+    Examples:
+    
+        Gradient of a scalar field:
+        ```python
+        p=ScalarField(torch.rand(1,1,10,10))
+        nabla = ConvNabla(order=2, device="cpu", dtype=torch.float32)
+        nabla*p # $\nabla p$
+        ```
+        
+        Divergence of a vector field:
+        ```python
+        u=VectorValue(ScalarField(torch.rand(1,1,10,10)),ScalarField(torch.rand(1,1,10,10)))
+        nabla = ConvNabla(order=2, device="cpu", dtype=torch.float32)
+        nabla@u # $\nabla \cdot u$
+        ```
+    Args:
+        order (int): The order of the central interpolation scheme (default is 2).
+        device (str, optional): The device to use for computation (default is "cpu").
+        dtype (torch.dtype, optional): The data type to use for computation (default is torch.float32).
+    
+    Returns:
+        ConvOperator (ConvOperator): The convolutional gradient operator.
+    """
     return VectorValue(
         ConvOperator(CENTRAL_INTERPOLATION_SCHEMES[order], direction='x', derivative=1, device=device, dtype=dtype), 
         ConvOperator(CENTRAL_INTERPOLATION_SCHEMES[order], direction='y', derivative=1, device=device, dtype=dtype)
         )
 
-class HOLaplacian():
+class ConvLaplacian():
+    r"""
+    Laplacian operator. 
+    For scalar field, it is defined as $\nabla^2 p = \partial^2 p / \partial x^2 + \partial^2 p / \partial y^2$.
+    For vector field, it is defined as $\nabla \cdot (\nabla \mathbf{u}) = (\frac{\partial u_x }{ \partial x}+\frac{\partial u_x }{ \partial y},\frac{\partial u_y }{ \partial x}+\frac{\partial u_y }{ \partial y})$.
+    
+    Examples:
+    
+        Gradient of a scalar field:
+        ```python
+        p=ScalarField(torch.rand(1,1,10,10))
+        nabla2 = ConvLaplacian(order=2, device="cpu", dtype=torch.float32)
+        nabla2*p # $\nabla^2 p$
+        ```
+        
+        Divergence of a vector field:
+        ```python
+        u=VectorValue(ScalarField(torch.rand(1,1,10,10)),ScalarField(torch.rand(1,1,10,10)))
+        nabla2 = ConvLaplacian(order=2, device="cpu", dtype=torch.float32)
+        nabla*u # $\nabla \cdot (\nabla \mathbf{u})$
+        ```
+        
+    Args:
+        order (int): The order of the central Laplacian scheme (default is 2).
+        device (str, optional): The device to use for computation (default is "cpu").
+        dtype (torch.dtype, optional): The data type to use for computation (default is torch.float32).
+    
+    Returns:
+        ConvOperator (ConvOperator): The convolutional gradient operator.
+    """
     def __init__(self, order: int, device="cpu", dtype=torch.float32) -> None:
         self.op_x = ConvOperator(
             CENTRAL_LAPLACIAN_SCHEMES[order], direction='x', derivative=2, device=device, dtype=dtype)
