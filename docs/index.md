@@ -4,7 +4,8 @@
 <img src="./assets/logo/ConvDO.svg"/>
 </center>
 
-ConvDO is a **Convolutional Differential Operator** designed for Physics-based deep learning study. It can be used to calculate the spatial derivative of a field.
+<h4 align="center">Convolutional Differential Operators for Physics-based Deep Learning Study</h4>
+<h6 align="center">Calculate the spatial derivative differentiablly!</h6>
 
 ## Installation
 
