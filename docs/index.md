@@ -7,7 +7,8 @@
 
 ## Installation
 
-* Install through pip: `pip install git+https://github.com/qiauil/ConvDO`
+* Install through pip: `pip install ConvDO`
+* Install the latest version through pip: `pip install git+https://github.com/qiauil/ConvDO`
 * Install locally: Download the repository and run `./install.sh` or `pip install .`
 
 ## Feature
@@ -33,4 +34,4 @@ If you need to solve more complex PDEs using differentiable functions, please ha
 * [PhiFlow](https://github.com/tum-pbs/PhiFlow): A differentiable PDE solving framework for machine learning
 * [Exponax](https://github.com/Ceyron/exponax): Efficient Differentiable n-d PDE solvers in JAX.
 
-For more research on physics based deep learning research, please visit the website of [our research group at TUM](https://ge.in.tum.de/publications/).
+For more research on physics based deep learning research, please visit the website of [our research group at TUM](https://ge.in.tum.de/publications/). 
