@@ -1,14 +1,9 @@
 <h1 align="center">
-  <img src="./docs/assets/logo/ConvDO.svg"/>
+  <img src="./docs/assets/logo/ConvDO.png" width="100"/>
+  <br>ConvDO<br>
 </h1>
-
 <h4 align="center">Convolutional Differential Operators for Physics-based Deep Learning Study</h4>
 <h6 align="center">Calculate the spatial derivative differentiablly!</h6>
-
-
-<p align="center">
-  [<a href="https://qiauil.github.io/ConvDO/">📖 Documentation & Examples</a>]
-</p>
 
 
 ## Installation
@@ -29,7 +24,7 @@ Positive😀 and negative🙃 things are all features...
 
 ## Documentations
 
-Check [here](https://qiauil.github.io/ConvDO/)
+Check 👉 [here](https://qiauil.github.io/ConvDO/)
 
 ## Further Reading
 

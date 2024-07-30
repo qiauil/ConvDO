@@ -1,11 +1,9 @@
 # Home
 
-<center>
-<img src="./assets/logo/ConvDO.svg"/>
-</center>
-
+<h1 align="center"><img src="./assets/logo/ConvDO.png" width="100"/><br>ConvDO<br></h1>
 <h4 align="center">Convolutional Differential Operators for Physics-based Deep Learning Study</h4>
 <h6 align="center">Calculate the spatial derivative differentiablly!</h6>
+
 
 ## Installation
 
