@@ -10,7 +10,8 @@
 
 ## Installation
 
-* Install through pip: `pip install git+https://github.com/qiauil/ConvDO`
+* Install through pip: `pip install ConvDO`
+* Install the latest version through pip: `pip install git+https://github.com/qiauil/ConvDO`
 * Install locally: Download the repository and run `./install.sh` or `pip install .`
 
 ## Feature

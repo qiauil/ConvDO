@@ -21,7 +21,7 @@ setuptools.setup(
     description="Convolutional Differential Operators with PyTorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://qiauil.github.io/",
+    url="https://qiauil.github.io/ConvDO/",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
