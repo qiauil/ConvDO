@@ -1,11 +1,11 @@
 #usr/bin/python3
 # -*- coding: UTF-8 -*-
+import torch
 from .helpers import *
 from .faces import *
 from .domain import *
 from .conv_operators import *
 from .meta_type import *
-import torch
 from typing import Union,Sequence,Optional
 
 def is_shape_equal(shape_filed1:ScalarField,shape_field2:ScalarField):
